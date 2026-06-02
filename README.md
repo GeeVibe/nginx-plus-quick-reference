@@ -1,4 +1,8 @@
-# NGINX Plus Quick Reference
+<p align="center">
+  <img src="docs/logo.png" alt="NGINX Plus Quick Reference" width="200" />
+</p>
+
+<h1 align="center">NGINX Plus Quick Reference</h1>
 
 > A field-ready, use-case-driven guide to what NGINX Plus unlocks beyond open-source NGINX.
 > Built for F5 Solutions Engineers in the field, NGINX Plus customers evaluating the platform, and anyone deciding between Plus and OSS.

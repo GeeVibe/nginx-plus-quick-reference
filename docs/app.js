@@ -1325,4 +1325,58 @@ server {
     });
   }
 
+  // ──────────────────────────────────────────────────────────
+  // Footer version stamp — populated from the state file the
+  // auto-updater maintains, so it always reflects the latest
+  // NGINX Plus release we've ingested.
+  // ──────────────────────────────────────────────────────────
+  function populateFooterVersion() {
+    var el = document.getElementById('footerVersionValue');
+    if (!el) return;
+    // version.txt is generated at deploy time by .github/workflows/deploy-pages.yml,
+    // which copies skills/nginx-plus-guide-updater/state/last-seen-version.txt into
+    // the published docs/ folder. Single source of truth: the state file the
+    // auto-updater maintains.
+    fetch('./version.txt', { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.text() : Promise.reject(new Error('HTTP ' + r.status)); })
+      .then(function (text) {
+        var v = (text || '').trim();
+        if (v) el.textContent = v;
+      })
+      .catch(function () {
+        // Quiet fallback — leaves the default "latest release" label in place.
+      });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', populateFooterVersion);
+  } else {
+    populateFooterVersion();
+  }
+
+  // Easter egg: triple-click footer brand to thank the humans behind NGINX.
+  function wireEasterEgg() {
+    var brand = document.getElementById('footerBrand');
+    var overlay = document.getElementById('eggOverlay');
+    var closeBtn = document.getElementById('eggClose');
+    if (!brand || !overlay) return;
+    var clicks = 0, timer = null;
+    function openEgg() { overlay.hidden = false; }
+    function closeEgg() { overlay.hidden = true; }
+    brand.addEventListener('click', function () {
+      clicks++;
+      clearTimeout(timer);
+      timer = setTimeout(function () { clicks = 0; }, 600);
+      if (clicks >= 3) { clicks = 0; openEgg(); }
+    });
+    if (closeBtn) closeBtn.addEventListener('click', closeEgg);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeEgg(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !overlay.hidden) closeEgg(); });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wireEasterEgg);
+  } else {
+    wireEasterEgg();
+  }
+
 })();

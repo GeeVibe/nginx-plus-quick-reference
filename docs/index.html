@@ -802,8 +802,8 @@
   <footer class="site-footer">
     <div class="footer-inner">
       <div class="footer-left">
-        <p class="footer-brand">NGINX Plus Quick Reference</p>
-        <p class="footer-updated">Last updated: February 27, 2026</p>
+        <p class="footer-brand" id="footerBrand" title="">NGINX Plus Quick Reference</p>
+        <p class="footer-updated" id="footerVersion">Updated as of <span id="footerVersionValue">latest release</span></p>
       </div>
       <div class="footer-right">
         <a href="https://nginx.org/en/docs/" target="_blank" rel="noopener noreferrer" class="footer-link">NGINX Official Documentation</a>
@@ -812,6 +812,18 @@
       </div>
     </div>
   </footer>
+
+  <!-- Easter Egg: triple-click footer brand to reveal -->
+  <div class="egg-overlay" id="eggOverlay" hidden>
+    <div class="egg-card" role="dialog" aria-modal="true" aria-labelledby="eggTitle">
+      <button class="egg-close" id="eggClose" aria-label="Close">×</button>
+      <img src="./logo.png" alt="" class="egg-logo" />
+      <h2 id="eggTitle" class="egg-title">Credit where it's due.</h2>
+      <p class="egg-body">This guide is a derivative work. The source of truth is <a href="https://docs.nginx.com/" target="_blank" rel="noopener noreferrer">docs.nginx.com</a> — written and maintained by humans whose craft made every card here possible.</p>
+      <p class="egg-body">And to <a href="https://github.com/nginx/nginx/graphs/contributors" target="_blank" rel="noopener noreferrer">every NGINX open-source contributor</a>, past and present — the maintainers, patch authors, bug reporters, module writers — you built the substrate that quietly runs a meaningful slice of the internet. A society-changing force, one commit at a time.</p>
+      <p class="egg-sig">— from the field, with gratitude</p>
+    </div>
+  </div>
 
   <!-- Fullscreen Diagram Overlay -->
   <div class="fs-overlay" id="fsOverlay">
