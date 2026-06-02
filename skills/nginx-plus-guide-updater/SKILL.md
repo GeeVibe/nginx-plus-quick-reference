@@ -25,18 +25,27 @@ Invoke this skill when any of the following happens:
 - `DOCS_BASE_URL` — `https://docs.nginx.com/nginx/`
 - `RELEASE_NOTES_URL` — `https://docs.nginx.com/nginx/releases/`
 
+## A note on release naming
+
+NGINX Plus releases come in two naming schemes the parser recognizes:
+
+- **R-series** (legacy): `R1` … `R36`, with optional patches like `R36 P5`. Frozen at R36 (Dec 2025).
+- **PLS-series** (current): `PLS.37.0.0.1`, `PLS.37.0.1.1`, `PLS.37.1.0.0`, etc. — used from May 2026 onward.
+
+For the purposes of this guide we don't care about LTS vs CR tracks or version-numbering nuance. The only question is: **"is there a newer release string than the one we last saw, and does it list any new directives?"** If yes, ingest the new directives. If no, stop.
+
 ## The five-step workflow
 
 ### Step 1 — Check the release notes
 
-Fetch `https://docs.nginx.com/nginx/releases/` and identify the **latest NGINX Plus release version** (e.g., R34, R35).
+Run `scripts/check-release-notes.py` (or fetch `https://docs.nginx.com/nginx/releases/` manually). The script returns the latest release string it found, whether R-series or PLS-series.
 
-Compare against `state/last-seen-version.txt`:
+Compare against `state/last-seen-version.txt` (plain text, one line, the version string).
 
 - If unchanged → **stop**. No PR. Exit clean.
-- If newer → continue to Step 2 with the new version number.
+- If newer → continue to Step 2 with the new version.
 
-The release-notes page lists every release with the new directives, modules, and modules-changed sections. Parse these.
+The release-notes page lists every release with its new directives, modules, and modules-changed sections. Parse those.
 
 ### Step 2 — Extract new directives
 
@@ -163,7 +172,7 @@ After the PR is opened, **stop**. Do not merge. Do not push to `main`.
 ## Files this skill touches
 
 - `docs/app.js` — append new entries to the directives array
-- `state/last-seen-version.txt` — track the last release version we've processed
+- `state/last-seen-version.txt` — last release version we've processed (plain text)
 - `CHANGELOG.md` — log what changed
 
 ## Files this skill READS (source of truth)
