@@ -1181,3 +1181,63 @@ body {
   border-radius: 2px;
   padding: 0 2px;
 }
+
+/* === Easter Egg: thanks to docs team === */
+.egg-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 14, 26, 0.85);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 24px;
+  animation: eggFade 200ms ease-out;
+}
+.egg-overlay[hidden] { display: none; }
+@keyframes eggFade { from { opacity: 0; } to { opacity: 1; } }
+.egg-card {
+  background: var(--primary-darker);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 32px 36px 28px;
+  max-width: 460px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  animation: eggPop 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes eggPop { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.egg-close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color var(--transition-fast);
+}
+.egg-close:hover { color: var(--text-primary); }
+.egg-logo { width: 120px; height: auto; margin: 4px auto 18px; display: block; }
+.egg-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 12px;
+  letter-spacing: -0.01em;
+}
+.egg-body {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin: 0 0 14px;
+}
+.egg-body a { color: var(--accent-teal); text-decoration: none; }
+.egg-body a:hover { text-decoration: underline; }
+.egg-sig { font-size: 12px; color: var(--text-muted); font-style: italic; margin: 0; }
+#footerBrand { user-select: none; }

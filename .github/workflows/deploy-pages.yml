@@ -30,6 +30,15 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
+      - name: Copy current release version into docs/
+        run: |
+          if [ -f skills/nginx-plus-guide-updater/state/last-seen-version.txt ]; then
+            cp skills/nginx-plus-guide-updater/state/last-seen-version.txt docs/version.txt
+            echo "Wrote docs/version.txt: $(cat docs/version.txt)"
+          else
+            echo "No state file found; skipping version stamp"
+          fi
+
       - name: Upload docs/ as the Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
