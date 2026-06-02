@@ -11,9 +11,13 @@ on:
         required: false
         default: "Manual check"
 
+# id-token: write is required by anthropics/claude-code-action@v1
+# (it mints a short-lived OIDC token for the Claude API even when an
+# anthropic_api_key is supplied).
 permissions:
   contents: write
   pull-requests: write
+  id-token: write
 
 jobs:
   check-and-draft:
@@ -71,7 +75,8 @@ jobs:
             Use the nginx-plus-guide-updater skill to process NGINX Plus release ${{ steps.check.outputs.latest_version }}.
             Follow the five-step workflow in skills/nginx-plus-guide-updater/SKILL.md.
             Open a pull request with the proposed changes.
-          allowed_tools: "Bash,Read,Write,Edit,WebFetch"
+          # Pass tool allow-list via claude_args (allowed_tools is no longer a top-level input on v1)
+          claude_args: --allowed-tools "Bash,Read,Write,Edit,WebFetch"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_ROOT: ${{ github.workspace }}
