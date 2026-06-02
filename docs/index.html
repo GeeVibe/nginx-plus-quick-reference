@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NGINX Plus Quick Reference — Commercial-Only Features for SEs</title>
+  <meta name="description" content="SE quick reference for NGINX Plus exclusive directives, modules, and features not available in NGINX Open Source.">
+
+  <!-- OpenGraph / Social previews -->
+  <meta property="og:title" content="NGINX Plus Quick Reference">
+  <meta property="og:description" content="A use-case-driven field guide to what NGINX Plus unlocks beyond open source. Built for F5 SEs, customers, and the NGINX community.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://geevibe.github.io/nginx-plus-quick-reference/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="NGINX Plus Quick Reference">
+  <meta name="twitter:description" content="A use-case-driven field guide to what NGINX Plus unlocks beyond open source.">
+
+  <link rel="canonical" href="https://geevibe.github.io/nginx-plus-quick-reference/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <!-- Sticky Navigation -->
+  <nav class="top-nav" id="topNav">
+    <div class="nav-inner">
+      <div class="nav-brand">
+        <svg class="nav-logo" width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect width="28" height="28" rx="6" fill="#00b4d8"/>
+          <text x="14" y="19" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="700" font-size="13" fill="#1a1a2e">N+</text>
+        </svg>
+        <span class="nav-title">NGINX Plus <span class="nav-title-accent">Quick Reference</span></span>
+      </div>
+      <div class="nav-search-wrap">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" class="nav-search" placeholder="Search directives, modules, or use cases..." autocomplete="off">
+        <kbd class="search-kbd">/</kbd>
+      </div>
+      <button class="mobile-search-btn" id="mobileSearchBtn" aria-label="Toggle search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+    </div>
+    <div class="mobile-search-bar" id="mobileSearchBar">
+      <input type="text" id="mobileSearchInput" class="nav-search" placeholder="Search directives, modules, or use cases..." autocomplete="off">
+    </div>
+  </nav>
+
+  <!-- Compact Info Bar -->
+  <div class="info-bar" id="infoBar">
+    <div class="info-bar-inner">
+      <div class="info-bar-stats" id="statsBar">
+        <span class="info-stat"><strong>~16</strong> Plus-Only Modules</span>
+        <span class="info-stat-sep">·</span>
+        <span class="info-stat"><strong>100+</strong> Directives</span>
+        <span class="info-stat-sep">·</span>
+        <span class="info-stat"><strong>17</strong> Use Case Categories</span>
+      </div>
+      <div class="info-bar-label" id="heroCategoryLabel" style="display:none;"></div>
+      <button class="info-bar-back" id="heroDiagramBack" style="display:none;">← All Categories</button>
+    </div>
+  </div>
+
+  <!-- Category Filter Pills -->
+  <section class="filter-section" id="filterSection">
+    <div class="filter-inner">
+      <p class="filter-prompt">Select a use case below to see what NGINX Plus unlocks beyond open source — diagrams, config examples, and customer value at a glance.</p>
+      <div class="filter-pills" id="filterPills">
+        <button class="pill active" data-category="all">All Categories</button>
+        <button class="pill" data-category="auth">Authentication &amp; SSO</button>
+        <button class="pill" data-category="health">Active Health Checks</button>
+        <button class="pill" data-category="api">Dynamic Configuration &amp; API</button>
+        <button class="pill" data-category="lb">Advanced Load Balancing</button>
+        <button class="pill" data-category="kv">Key-Value Store</button>
+        <button class="pill" data-category="ha">High Availability &amp; Clustering</button>
+        <button class="pill" data-category="iot">IoT &amp; MQTT</button>
+        <button class="pill" data-category="cache">Cache Management</button>
+        <button class="pill" data-category="media">Media Streaming</button>
+        <button class="pill" data-category="session-log">Session Logging</button>
+        <button class="pill" data-category="routing">Dynamic Upstream Routing</button>
+        <button class="pill" data-category="tls">TLS/SSL Debugging &amp; Security</button>
+        <button class="pill" data-category="tunnel">HTTP Tunneling</button>
+        <button class="pill" data-category="internal">Internal Routing</button>
+        <button class="pill" data-category="stream-session">Stream Session Management</button>
+        <button class="pill" data-category="perf">Performance &amp; Observability</button>
+        <button class="pill" data-category="proxy-proto">PROXY Protocol Vendor Extensions</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Diagram Panel (shown when single category selected) -->
+  <div class="diagram-panel" id="heroDiagramPanel">
+    <div class="diagram-panel-inner">
+      <button class="diagram-expand-btn" id="diagramExpandBtn" title="Fullscreen (F)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+      </button>
+      <div class="diagram-wrap" id="heroDiagramWrap">
+        <!-- SVG injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Count -->
+  <div class="results-count" id="resultsCount">
+    <span id="resultsText">Showing all 36 entries</span>
+  </div>
+
+  <!-- Main Content: Cards grouped by category -->
+  <main class="main-content" id="mainContent">
+
+    <!-- Authentication & SSO -->
+    <section class="category-section" data-category="auth" id="section-auth">
+      <div class="category-header">
+        <div class="category-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h2 class="category-title">Authentication &amp; Single Sign-On</h2>
+        <span class="category-count">3 entries</span>
+      </div>
+      <div class="cards-grid">
+
+        <!-- Card 1: JWT -->
+        <article class="card" data-search="auth_jwt auth_jwt_claim_set auth_jwt_header_set auth_jwt_key_cache auth_jwt_key_file auth_jwt_key_request auth_jwt_leeway auth_jwt_type auth_jwt_require ngx_http_auth_jwt_module jwt json web token oauth openid connect okta auth0 azure ad api authentication zero-trust">
+          <div class="card-badge">Entire Module — Plus Only</div>
+          <h3 class="card-module">ngx_http_auth_jwt_module</h3>
+          <div class="card-directives">
+            <code>auth_jwt</code> <code>auth_jwt_claim_set</code> <code>auth_jwt_header_set</code> <code>auth_jwt_key_cache</code> <code>auth_jwt_key_file</code> <code>auth_jwt_key_request</code> <code>auth_jwt_leeway</code> <code>auth_jwt_type</code> <code>auth_jwt_require</code>
+          </div>
+          <p class="card-usecase">Validate JSON Web Tokens (JWT) at the edge for API authentication</p>
+          <p class="card-value">Offload token validation from backend apps, enforce zero-trust API security, integrate with OAuth 2.0 / OpenID Connect providers like Okta, Auth0, Azure AD.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_auth_jwt_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+        <!-- Card 2: OIDC -->
+        <article class="card" data-search="oidc_provider auth_oidc issuer client_id client_secret config_url cookie_name extra_auth_args frontchannel_logout_uri pkce redirect_uri logout_uri post_logout_uri logout_token_hint scope store session_timeout ssl_crl ssl_trusted_certificate userinfo ngx_http_oidc_module openid connect sso single sign-on okta azure keycloak ping identity">
+          <div class="card-badge">Entire Module — Plus Only</div>
+          <h3 class="card-module">ngx_http_oidc_module</h3>
+          <div class="card-directives">
+            <code>oidc_provider</code> <code>auth_oidc</code> <code>issuer</code> <code>client_id</code> <code>client_secret</code> <code>config_url</code> <code>cookie_name</code> <code>extra_auth_args</code> <code>frontchannel_logout_uri</code> <code>pkce</code> <code>redirect_uri</code> <code>logout_uri</code> <code>post_logout_uri</code> <code>logout_token_hint</code> <code>scope</code> <code>store</code> <code>session_timeout</code> <code>ssl_crl</code> <code>ssl_trusted_certificate</code> <code>userinfo</code>
+          </div>
+          <p class="card-usecase">Native OpenID Connect SSO without custom code</p>
+          <p class="card-value">Enable Single Sign-On for web apps using identity providers (Okta, Azure AD, Keycloak, Ping Identity) — no Lua scripts, no custom code. Supports PKCE, front-channel logout, session management out of the box.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_oidc_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+        <!-- Card 3: Auth Require -->
+        <article class="card" data-search="auth_require ngx_http_auth_require_module variable access control authorization fine-grained">
+          <div class="card-badge">Entire Module — Plus Only</div>
+          <h3 class="card-module">ngx_http_auth_require_module</h3>
+          <div class="card-directives">
+            <code>auth_require</code>
+          </div>
+          <p class="card-usecase">Variable-based fine-grained access control</p>
+          <p class="card-value">Build custom authorization logic combining JWT claims, geo-IP data, headers, or any NGINX variable into access decisions — all in config, no code required.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_auth_require_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Active Health Checks -->
+    <section class="category-section" data-category="health" id="section-health">
+      <div class="category-header">
+        <div class="category-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <h2 class="category-title">Active Health Checks</h2>
+        <span class="category-count">2 entries</span>
+      </div>
+      <div class="cards-grid">
+
+        <article class="card" data-search="health_check match ngx_http_upstream_hc_module active health check backend probe zero-downtime canary">
+          <div class="card-badge">Entire Module — Plus Only</div>
+          <h3 class="card-module">ngx_http_upstream_hc_module</h3>
+          <div class="card-directives">
+            <code>health_check</code> <code>match</code>
+          </div>
+          <p class="card-usecase">Proactively detect and remove unhealthy backends before users are affected</p>
+          <p class="card-value">Unlike OSS passive-only checks that only detect failures after real user requests fail, Plus actively probes backends on a schedule. Define custom health criteria (HTTP status, response body, headers). Essential for zero-downtime deployments and canary releases.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_upstream_hc_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+        <article class="card" data-search="health_check health_check_timeout match ngx_stream_upstream_hc_module tcp udp stream active health check database dns mqtt redis">
+          <div class="card-badge">Entire Module — Plus Only</div>
+          <h3 class="card-module">ngx_stream_upstream_hc_module</h3>
+          <div class="card-directives">
+            <code>health_check</code> <code>health_check_timeout</code> <code>match</code>
+          </div>
+          <p class="card-usecase">Active health checks for TCP/UDP services (databases, DNS, MQTT, etc.)</p>
+          <p class="card-value">Monitor health of non-HTTP services like databases, Redis, DNS servers, and MQTT brokers with custom send/expect patterns at the TCP layer.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/stream/ngx_stream_upstream_hc_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Dynamic Configuration & API -->
+    <section class="category-section" data-category="api" id="section-api">
+      <div class="category-header">
+        <div class="category-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+        <h2 class="category-title">Dynamic Configuration &amp; API</h2>
+        <span class="category-count">2 entries</span>
+      </div>
+      <div class="cards-grid">
+
+        <article class="card" data-search="api status_zone ngx_http_api_module rest api monitoring configuration live metrics upstream server key-value ci/cd service discovery auto-scaling dashboard">
+          <div class="card-badge">Entire Module — Plus Only</div>
+          <h3 class="card-module">ngx_http_api_module</h3>
+          <div class="card-directives">
+            <code>api</code> <code>status_zone</code>
+          </div>
+          <p class="card-usecase">REST API for live monitoring and configuration changes — no reloads needed</p>
+          <p class="card-value">Add/remove upstream servers, query real-time metrics per server/location/zone, manage key-value stores, and drain connections — all via REST API. Power CI/CD pipelines, service discovery, auto-scaling, and dashboards without touching config files or reloading.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_api_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+        <article class="card" data-search="state ngx_http_upstream_module ngx_stream_upstream_module persist dynamic upstream restart reload">
+          <div class="card-badge">Plus-Only Directive</div>
+          <h3 class="card-module">ngx_http_upstream_module &amp; ngx_stream_upstream_module</h3>
+          <div class="card-directives">
+            <code>state</code>
+          </div>
+          <p class="card-usecase">Persist dynamic upstream changes across restarts</p>
+          <p class="card-value">When you add/remove servers via API, the state file preserves those changes so they survive NGINX restarts. Critical for production reliability in dynamic environments.</p>
+          <div class="card-links-multi">
+            <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_upstream_module.html#state" target="_blank" rel="noopener noreferrer">HTTP Docs <span class="arrow">→</span></a>
+            <a class="card-link" href="https://nginx.org/en/docs/stream/ngx_stream_upstream_module.html#state" target="_blank" rel="noopener noreferrer">Stream Docs <span class="arrow">→</span></a>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Advanced Load Balancing -->
+    <section class="category-section" data-category="lb" id="section-lb">
+      <div class="category-header">
+        <div class="category-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>
+        </div>
+        <h2 class="category-title">Advanced Load Balancing</h2>
+        <span class="category-count">7 entries</span>
+      </div>
+      <div class="cards-grid">
+
+        <article class="card" data-search="least_time ngx_http_upstream_module ngx_stream_upstream_module response time fastest backend load balancing">
+          <div class="card-badge">Plus-Only Directive</div>
+          <h3 class="card-module">ngx_http_upstream_module &amp; ngx_stream_upstream_module</h3>
+          <div class="card-directives">
+            <code>least_time</code>
+          </div>
+          <p class="card-usecase">Route to the fastest backend — not just the least busy</p>
+          <p class="card-value">Combines response time AND connection count to pick the optimal server. Delivers better user experience by routing to genuinely healthy, fast backends rather than just counting connections.</p>
+          <div class="card-links-multi">
+            <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_upstream_module.html#least_time" target="_blank" rel="noopener noreferrer">HTTP Docs <span class="arrow">→</span></a>
+            <a class="card-link" href="https://nginx.org/en/docs/stream/ngx_stream_upstream_module.html#least_time" target="_blank" rel="noopener noreferrer">Stream Docs <span class="arrow">→</span></a>
+          </div>
+        </article>
+
+        <article class="card" data-search="sticky ngx_http_upstream_module session persistence sticky sessions cookie route learn stateful shopping cart websocket">
+          <div class="card-badge">Plus-Only Directive</div>
+          <h3 class="card-module">ngx_http_upstream_module</h3>
+          <div class="card-directives">
+            <code>sticky</code>
+          </div>
+          <p class="card-usecase">Session persistence / sticky sessions for stateful applications</p>
+          <p class="card-value">Bind user sessions to specific backend servers using cookies, routes, or learned patterns. Essential for shopping carts, WebSocket apps, legacy stateful apps that can't share session state.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_upstream_module.html#sticky" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+        <article class="card" data-search="ntlm ngx_http_upstream_module windows iis integrated authentication ntlm passthrough">
+          <div class="card-badge">Plus-Only Directive</div>
+          <h3 class="card-module">ngx_http_upstream_module</h3>
+          <div class="card-directives">
+            <code>ntlm</code>
+          </div>
+          <p class="card-usecase">NTLM authentication passthrough for Windows/IIS backends</p>
+          <p class="card-value">Proxies NTLM auth handshake by keeping the upstream connection bound to the client connection. Required for enterprises with Windows IIS backends using Integrated Windows Authentication.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_upstream_module.html#ntlm" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+        <article class="card" data-search="queue ngx_http_upstream_module traffic spike 502 busy backend request queue">
+          <div class="card-badge">Plus-Only Directive</div>
+          <h3 class="card-module">ngx_http_upstream_module</h3>
+          <div class="card-directives">
+            <code>queue</code>
+          </div>
+          <p class="card-usecase">Queue requests when all backends are busy instead of failing immediately</p>
+          <p class="card-value">During traffic spikes, hold requests in a queue for a configurable time rather than returning 502 errors. Smooths load spikes and prevents cascading failures.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_upstream_module.html#queue" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+        <article class="card" data-search="slow_start ngx_http_upstream_module server parameter ramp traffic recovering gradual warm cold cache">
+          <div class="card-badge">Plus-Only Server Parameter</div>
+          <h3 class="card-module">ngx_http_upstream_module</h3>
+          <div class="card-directives">
+            <code>slow_start</code>
+          </div>
+          <p class="card-usecase">Gradually ramp up traffic to a recovering server</p>
+          <p class="card-value">When a server comes back online or is added, slowly increase its traffic share over a configured period. Prevents overwhelming a cold server/cache and ensures graceful scaling.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_upstream_module.html#server" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+        <article class="card" data-search="drain ngx_http_upstream_module server parameter graceful connections maintenance zero-downtime deploy">
+          <div class="card-badge">Plus-Only Server Parameter</div>
+          <h3 class="card-module">ngx_http_upstream_module</h3>
+          <div class="card-directives">
+            <code>drain</code>
+          </div>
+          <p class="card-usecase">Gracefully drain connections before taking a server offline</p>
+          <p class="card-value">Stop sending new requests to a server while allowing existing connections to complete. Essential for maintenance windows and zero-downtime deploys.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_upstream_module.html#server" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+        <article class="card" data-search="route ngx_http_upstream_module server parameter session affinity blue-green canary deployment deterministic routing">
+          <div class="card-badge">Plus-Only Server Parameter</div>
+          <h3 class="card-module">ngx_http_upstream_module</h3>
+          <div class="card-directives">
+            <code>route</code>
+          </div>
+          <p class="card-usecase">Route-based session affinity for advanced deployments</p>
+          <p class="card-value">Assign route labels to upstream servers for deterministic routing, used with sticky route for blue-green and canary deployments.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_upstream_module.html#server" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Key-Value Store -->
+    <section class="category-section" data-category="kv" id="section-kv">
+      <div class="category-header">
+        <div class="category-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        </div>
+        <h2 class="category-title">Key-Value Store</h2>
+        <span class="category-count">2 entries</span>
+      </div>
+      <div class="cards-grid">
+
+        <article class="card" data-search="keyval keyval_zone ngx_http_keyval_module key-value database deny list feature flag a/b testing rate limit override session storage api dynamic">
+          <div class="card-badge">Entire Module — Plus Only</div>
+          <h3 class="card-module">ngx_http_keyval_module</h3>
+          <div class="card-directives">
+            <code>keyval</code> <code>keyval_zone</code>
+          </div>
+          <p class="card-usecase">In-memory key-value database accessible via API — dynamic deny lists, feature flags, A/B testing</p>
+          <p class="card-value">Create runtime-configurable lookup tables managed via REST API. Use cases: dynamic IP deny lists, feature flags, A/B test routing, per-client rate limit overrides, session storage — all without config reloads.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_keyval_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+        <article class="card" data-search="keyval keyval_zone ngx_stream_keyval_module key-value store tcp udp stream layer 4">
+          <div class="card-badge">Entire Module — Plus Only</div>
+          <h3 class="card-module">ngx_stream_keyval_module</h3>
+          <div class="card-directives">
+            <code>keyval</code> <code>keyval_zone</code>
+          </div>
+          <p class="card-usecase">Key-value store for TCP/UDP stream context</p>
+          <p class="card-value">Same dynamic key-value capability for Layer 4 traffic management.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/stream/ngx_stream_keyval_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- High Availability & Clustering -->
+    <section class="category-section" data-category="ha" id="section-ha">
+      <div class="category-header">
+        <div class="category-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="8" y="14" width="8" height="8" rx="1"/><path d="M6 10v2a2 2 0 0 0 2 2h1"/><path d="M18 10v2a2 2 0 0 1-2 2h-1"/></svg>
+        </div>
+        <h2 class="category-title">High Availability &amp; Clustering</h2>
+        <span class="category-count">1 entry</span>
+      </div>
+      <div class="cards-grid">
+
+        <article class="card" data-search="zone_sync zone_sync_buffers zone_sync_connect_retry_interval zone_sync_connect_timeout zone_sync_interval zone_sync_recv_buffer_size zone_sync_server zone_sync_ssl zone_sync_ssl_certificate zone_sync_ssl_certificate_key zone_sync_ssl_ciphers zone_sync_ssl_conf_command zone_sync_ssl_crl zone_sync_ssl_name zone_sync_ssl_password_file zone_sync_ssl_protocols zone_sync_ssl_server_name zone_sync_ssl_trusted_certificate zone_sync_ssl_verify zone_sync_ssl_verify_depth zone_sync_timeout ngx_stream_zone_sync_module shared memory cluster synchronize HA sticky rate limiting">
+          <div class="card-badge">Entire Module — Plus Only</div>
+          <h3 class="card-module">ngx_stream_zone_sync_module</h3>
+          <div class="card-directives">
+            <code>zone_sync</code> <code>zone_sync_buffers</code> <code>zone_sync_connect_retry_interval</code> <code>zone_sync_connect_timeout</code> <code>zone_sync_interval</code> <code>zone_sync_recv_buffer_size</code> <code>zone_sync_server</code> <code>zone_sync_ssl</code> <code>zone_sync_ssl_certificate</code> <code>zone_sync_ssl_certificate_key</code> <code>zone_sync_timeout</code>
+            <span class="card-directives-more">+10 more SSL directives</span>
+          </div>
+          <p class="card-usecase">Synchronize shared memory zones across NGINX Plus cluster nodes</p>
+          <p class="card-value">Keep sticky sessions, rate limiting counters, key-value stores, and other runtime state in sync across all NGINX Plus instances. Critical for HA deployments behind external load balancers where any node can serve any client.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/stream/ngx_stream_zone_sync_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- IoT & MQTT -->
+    <section class="category-section" data-category="iot" id="section-iot">
+      <div class="category-header">
+        <div class="category-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/></svg>
+        </div>
+        <h2 class="category-title">IoT &amp; MQTT</h2>
+        <span class="category-count">2 entries</span>
+      </div>
+      <div class="cards-grid">
+
+        <article class="card" data-search="mqtt_preread ngx_stream_mqtt_preread_module mqtt connect iot device routing client id layer 4">
+          <div class="card-badge">Entire Module — Plus Only</div>
+          <h3 class="card-module">ngx_stream_mqtt_preread_module</h3>
+          <div class="card-directives">
+            <code>mqtt_preread</code>
+          </div>
+          <p class="card-usecase">Parse MQTT CONNECT packets to route IoT device traffic by client ID</p>
+          <p class="card-value">Inspect MQTT protocol headers at Layer 4 to make routing decisions (e.g., route specific IoT devices to specific broker clusters) without terminating the connection.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/stream/ngx_stream_mqtt_preread_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+        <article class="card" data-search="mqtt mqtt_buffers mqtt_rewrite_buffer_size mqtt_set_connect ngx_stream_mqtt_filter_module mqtt rewrite multi-tenant iot broker">
+          <div class="card-badge">Entire Module — Plus Only</div>
+          <h3 class="card-module">ngx_stream_mqtt_filter_module</h3>
+          <div class="card-directives">
+            <code>mqtt</code> <code>mqtt_buffers</code> <code>mqtt_rewrite_buffer_size</code> <code>mqtt_set_connect</code>
+          </div>
+          <p class="card-usecase">Rewrite MQTT CONNECT messages for multi-tenant IoT platforms</p>
+          <p class="card-value">Modify MQTT client ID or username on the fly for multi-tenant broker architectures. Enables single broker cluster to serve isolated tenants.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/stream/ngx_stream_mqtt_filter_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Cache Management -->
+    <section class="category-section" data-category="cache" id="section-cache">
+      <div class="category-header">
+        <div class="category-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+        <h2 class="category-title">Cache Management</h2>
+        <span class="category-count">2 entries</span>
+      </div>
+      <div class="cards-grid">
+
+        <article class="card" data-search="proxy_cache_purge ngx_http_proxy_module cache purge invalidate cdn cms e-commerce content stale">
+          <div class="card-badge">Plus-Only Directive</div>
+          <h3 class="card-module">ngx_http_proxy_module</h3>
+          <div class="card-directives">
+            <code>proxy_cache_purge</code>
+          </div>
+          <p class="card-usecase">Selectively purge cached content on demand</p>
+          <p class="card-value">Invalidate specific cached URLs via API call when content changes. Essential for CDN-like deployments, CMS, and e-commerce where stale content costs revenue.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_purge" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+        <article class="card" data-search="fastcgi_cache_purge uwsgi_cache_purge ngx_http_fastcgi_module ngx_http_uwsgi_module cache purge php python fpm uwsgi">
+          <div class="card-badge">Plus-Only Directives</div>
+          <h3 class="card-module">ngx_http_fastcgi_module &amp; ngx_http_uwsgi_module</h3>
+          <div class="card-directives">
+            <code>fastcgi_cache_purge</code> <code>uwsgi_cache_purge</code>
+          </div>
+          <p class="card-usecase">Purge cached FastCGI/uWSGI responses on demand</p>
+          <p class="card-value">Same selective cache purging for PHP-FPM (FastCGI) and Python (uWSGI) application backends.</p>
+          <div class="card-links-multi">
+            <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_fastcgi_module.html#fastcgi_cache_purge" target="_blank" rel="noopener noreferrer">FastCGI Docs <span class="arrow">→</span></a>
+            <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_uwsgi_module.html#uwsgi_cache_purge" target="_blank" rel="noopener noreferrer">uWSGI Docs <span class="arrow">→</span></a>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Media Streaming -->
+    <section class="category-section" data-category="media" id="section-media">
+      <div class="category-header">
+        <div class="category-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <h2 class="category-title">Media Streaming</h2>
+        <span class="category-count">1 entry</span>
+      </div>
+      <div class="cards-grid">
+
+        <article class="card" data-search="hls hls_buffers hls_forward_args hls_fragment hls_mp4_buffer_size hls_mp4_max_buffer_size ngx_http_hls_module http live streaming mp4 mov video adaptive bitrate ios safari">
+          <div class="card-badge">Entire Module — Plus Only</div>
+          <h3 class="card-module">ngx_http_hls_module</h3>
+          <div class="card-directives">
+            <code>hls</code> <code>hls_buffers</code> <code>hls_forward_args</code> <code>hls_fragment</code> <code>hls_mp4_buffer_size</code> <code>hls_mp4_max_buffer_size</code>
+          </div>
+          <p class="card-usecase">On-the-fly HLS (HTTP Live Streaming) for MP4/MOV video</p>
+          <p class="card-value">Serve MP4 files as HLS streams without transcoding. Delivers adaptive bitrate video to iOS/Safari and other HLS clients directly from NGINX Plus.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_hls_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Session Logging -->
+    <section class="category-section" data-category="session-log" id="section-session-log">
+      <div class="category-header">
+        <div class="category-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <h2 class="category-title">Session Logging</h2>
+        <span class="category-count">1 entry</span>
+      </div>
+      <div class="cards-grid">
+
+        <article class="card" data-search="session_log session_log_format session_log_zone ngx_http_session_log_module session aggregate log analytics billing audit">
+          <div class="card-badge">Entire Module — Plus Only</div>
+          <h3 class="card-module">ngx_http_session_log_module</h3>
+          <div class="card-directives">
+            <code>session_log</code> <code>session_log_format</code> <code>session_log_zone</code>
+          </div>
+          <p class="card-usecase">Aggregate multiple requests into a single session log entry</p>
+          <p class="card-value">Instead of one log line per request, log once per session with aggregated stats. Useful for analytics, billing, and audit trails where session-level data matters more than per-request data.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_session_log_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Dynamic Upstream Routing -->
+    <section class="category-section" data-category="routing" id="section-routing">
+      <div class="category-header">
+        <div class="category-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
+        </div>
+        <h2 class="category-title">Dynamic Upstream Routing</h2>
+        <span class="category-count">3 entries</span>
+      </div>
+      <div class="cards-grid">
+
+        <article class="card" data-search="proxy_allow_upstream grpc_allow_upstream fastcgi_allow_upstream uwsgi_allow_upstream scgi_allow_upstream memcached_allow_upstream tunnel_allow_upstream ngx_http_proxy_module security multi-tenant restrict upstream">
+          <div class="card-badge">Plus-Only Directives</div>
+          <h3 class="card-module">ngx_http_proxy_module (+ grpc, fastcgi, uwsgi, scgi, memcached, tunnel)</h3>
+          <div class="card-directives">
+            <code>proxy_allow_upstream</code> <code>grpc_allow_upstream</code> <code>fastcgi_allow_upstream</code> <code>uwsgi_allow_upstream</code> <code>scgi_allow_upstream</code> <code>memcached_allow_upstream</code> <code>tunnel_allow_upstream</code>
+          </div>
+          <p class="card-usecase">Restrict which upstreams a location can proxy to</p>
+          <p class="card-value">Security hardening in multi-tenant configs — prevent config mistakes from routing traffic to unintended upstream groups.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_allow_upstream" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+        <article class="card" data-search="proxy_bind_dynamic grpc_bind_dynamic fastcgi_bind_dynamic uwsgi_bind_dynamic scgi_bind_dynamic memcached_bind_dynamic tunnel_bind_dynamic proxy_bind_dynamic source ip multi-homed transparent proxy cloud network interface">
+          <div class="card-badge">Plus-Only Directives</div>
+          <h3 class="card-module">ngx_http_proxy_module (+ grpc, fastcgi, uwsgi, scgi, memcached, tunnel, stream)</h3>
+          <div class="card-directives">
+            <code>proxy_bind_dynamic</code> <code>grpc_bind_dynamic</code> <code>fastcgi_bind_dynamic</code> <code>uwsgi_bind_dynamic</code> <code>scgi_bind_dynamic</code> <code>memcached_bind_dynamic</code> <code>tunnel_bind_dynamic</code>
+          </div>
+          <p class="card-usecase">Dynamically bind outgoing connections to specific source IPs</p>
+          <p class="card-value">Use variables to select source IP at runtime — essential for multi-homed servers, transparent proxying, and cloud environments with multiple network interfaces.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_bind_dynamic" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+        <article class="card" data-search="proxy_request_dynamic grpc_request_dynamic fastcgi_request_dynamic uwsgi_request_dynamic scgi_request_dynamic upstream group variable jwt claims headers cookies api gateway routing">
+          <div class="card-badge">Plus-Only Directives</div>
+          <h3 class="card-module">ngx_http_proxy_module (+ grpc, fastcgi, uwsgi, scgi)</h3>
+          <div class="card-directives">
+            <code>proxy_request_dynamic</code> <code>grpc_request_dynamic</code> <code>fastcgi_request_dynamic</code> <code>uwsgi_request_dynamic</code> <code>scgi_request_dynamic</code>
+          </div>
+          <p class="card-usecase">Dynamically select upstream group using variables</p>
+          <p class="card-value">Route requests to different upstream groups based on runtime conditions (JWT claims, headers, cookies) without complex map/if blocks. Powers advanced API gateway routing patterns.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_request_dynamic" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- TLS/SSL Debugging & Security -->
+    <section class="category-section" data-category="tls" id="section-tls">
+      <div class="category-header">
+        <div class="category-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h2 class="category-title">TLS/SSL Debugging &amp; Security</h2>
+        <span class="category-count">2 entries</span>
+      </div>
+      <div class="cards-grid">
+
+        <article class="card" data-search="ssl_key_log_file proxy_ssl_key_log_file grpc_ssl_key_log_file ngx_http_ssl_module ngx_stream_ssl_module tls session keys wireshark decryption debugging packet capture compliance">
+          <div class="card-badge">Plus-Only Directives</div>
+          <h3 class="card-module">ngx_http_ssl_module &amp; ngx_stream_ssl_module</h3>
+          <div class="card-directives">
+            <code>ssl_key_log_file</code> <code>proxy_ssl_key_log_file</code> <code>grpc_ssl_key_log_file</code>
+          </div>
+          <p class="card-usecase">Log TLS session keys for Wireshark decryption and debugging</p>
+          <p class="card-value">Capture TLS pre-master secrets for packet capture analysis without breaking encryption in production. Critical for troubleshooting SSL issues, performance analysis, and compliance audits.</p>
+          <div class="card-links-multi">
+            <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_key_log_file" target="_blank" rel="noopener noreferrer">HTTP SSL Docs <span class="arrow">→</span></a>
+            <a class="card-link" href="https://nginx.org/en/docs/stream/ngx_stream_ssl_module.html#ssl_key_log_file" target="_blank" rel="noopener noreferrer">Stream SSL Docs <span class="arrow">→</span></a>
+          </div>
+        </article>
+
+        <article class="card" data-search="proxy_ssl_certificate_cache ngx_http_proxy_module mtls certificate cache upstream dynamic variable scale">
+          <div class="card-badge">Plus-Only Directive</div>
+          <h3 class="card-module">ngx_http_proxy_module (HTTP &amp; Stream)</h3>
+          <div class="card-directives">
+            <code>proxy_ssl_certificate_cache</code>
+          </div>
+          <p class="card-usecase">Cache dynamically loaded SSL certificates for upstream connections</p>
+          <p class="card-value">When using variables in proxy_ssl_certificate, caching avoids re-reading certs from disk on every request. Critical for mTLS at scale with many client certificates.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ssl_certificate_cache" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- HTTP Tunneling -->
+    <section class="category-section" data-category="tunnel" id="section-tunnel">
+      <div class="category-header">
+        <div class="category-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
+        </div>
+        <h2 class="category-title">HTTP Tunneling</h2>
+        <span class="category-count">1 entry</span>
+      </div>
+      <div class="cards-grid">
+
+        <article class="card" data-search="tunnel_pass tunnel_bind tunnel_bind_dynamic tunnel_buffer_size tunnel_connect_timeout tunnel_next_upstream tunnel_next_upstream_timeout tunnel_next_upstream_tries tunnel_read_timeout tunnel_send_lowat tunnel_send_timeout tunnel_socket_keepalive tunnel_allow_upstream ngx_http_tunnel_module http connect forward proxy vpn tcp pass-through">
+          <div class="card-badge">Entire Module — Plus Only</div>
+          <h3 class="card-module">ngx_http_tunnel_module</h3>
+          <div class="card-directives">
+            <code>tunnel_pass</code> <code>tunnel_bind</code> <code>tunnel_bind_dynamic</code> <code>tunnel_buffer_size</code> <code>tunnel_connect_timeout</code> <code>tunnel_next_upstream</code> <code>tunnel_next_upstream_timeout</code> <code>tunnel_next_upstream_tries</code> <code>tunnel_read_timeout</code> <code>tunnel_send_timeout</code> <code>tunnel_socket_keepalive</code> <code>tunnel_allow_upstream</code>
+          </div>
+          <p class="card-usecase">HTTP CONNECT-based forward proxy tunneling</p>
+          <p class="card-value">Enable HTTP CONNECT method for forward proxy use cases — VPN-like tunneling, proxy chaining, and secure pass-through of arbitrary TCP traffic over HTTP.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_tunnel_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Internal Routing -->
+    <section class="category-section" data-category="internal" id="section-internal">
+      <div class="category-header">
+        <div class="category-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 10 20 15 15 20"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/></svg>
+        </div>
+        <h2 class="category-title">Internal Routing</h2>
+        <span class="category-count">1 entry</span>
+      </div>
+      <div class="cards-grid">
+
+        <article class="card" data-search="internal_redirect ngx_http_internal_redirect_module programmatic redirect variable api gateway multi-tenant routing">
+          <div class="card-badge">Entire Module — Plus Only</div>
+          <h3 class="card-module">ngx_http_internal_redirect_module</h3>
+          <div class="card-directives">
+            <code>internal_redirect</code>
+          </div>
+          <p class="card-usecase">Programmatic internal redirects based on variable conditions</p>
+          <p class="card-value">Redirect requests internally based on runtime variables without return/rewrite. Useful for complex routing logic in API gateways and multi-tenant platforms.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_internal_redirect_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Stream Session Management -->
+    <section class="category-section" data-category="stream-session" id="section-stream-session">
+      <div class="category-header">
+        <div class="category-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+        </div>
+        <h2 class="category-title">Stream Session Management</h2>
+        <span class="category-count">1 entry</span>
+      </div>
+      <div class="cards-grid">
+
+        <article class="card" data-search="proxy_session_drop ngx_stream_proxy_module session terminate stream health check failover tcp database mqtt">
+          <div class="card-badge">Plus-Only Directive</div>
+          <h3 class="card-module">ngx_stream_proxy_module</h3>
+          <div class="card-directives">
+            <code>proxy_session_drop</code>
+          </div>
+          <p class="card-usecase">Immediately terminate stream sessions when upstream fails health check</p>
+          <p class="card-value">When a health check marks a server as down, existing TCP sessions to that server are dropped immediately rather than hanging. Ensures fast failover for database connections, MQTT sessions, etc.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/stream/ngx_stream_proxy_module.html#proxy_session_drop" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Performance & Observability -->
+    <section class="category-section" data-category="perf" id="section-perf">
+      <div class="category-header">
+        <div class="category-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+        </div>
+        <h2 class="category-title">Performance &amp; Observability</h2>
+        <span class="category-count">3 entries</span>
+      </div>
+      <div class="cards-grid">
+
+        <article class="card" data-search="stall_threshold ngx_core_module event loop stall performance bottleneck disk io dns slow module">
+          <div class="card-badge">Plus-Only Directive</div>
+          <h3 class="card-module">ngx_core_module</h3>
+          <div class="card-directives">
+            <code>stall_threshold</code>
+          </div>
+          <p class="card-usecase">Detect and log event loop stalls for performance troubleshooting</p>
+          <p class="card-value">Automatically detect when the NGINX event loop is blocked longer than a threshold and log warnings. Helps identify performance bottlenecks from slow disk I/O, DNS lookups, or third-party modules.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/ngx_core_module.html#stall_threshold" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+        <article class="card" data-search="status status_format status_zone ngx_http_status_module real-time dashboard monitoring json jsonp legacy">
+          <div class="card-badge">Entire Module — Plus Only (Legacy)</div>
+          <h3 class="card-module">ngx_http_status_module</h3>
+          <div class="card-directives">
+            <code>status</code> <code>status_format</code> <code>status_zone</code>
+          </div>
+          <p class="card-usecase">Real-time status dashboard (legacy)</p>
+          <p class="card-value">Live JSON/JSONP status feed for monitoring. Now superseded by the more capable ngx_http_api_module.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_status_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+        <article class="card" data-search="status_zone listen resolver parameter metrics per-listener per-resolver virtual server dns monitoring dashboard">
+          <div class="card-badge">Plus-Only Parameters</div>
+          <h3 class="card-module">Various (listen &amp; resolver directives)</h3>
+          <div class="card-directives">
+            <code>listen ... status_zone=</code> <code>resolver ... status_zone=</code>
+          </div>
+          <p class="card-usecase">Per-listener and per-resolver metrics collection</p>
+          <p class="card-value">Collect granular metrics on individual virtual servers and DNS resolvers for monitoring dashboards and troubleshooting.</p>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- PROXY Protocol Vendor Extensions -->
+    <section class="category-section" data-category="proxy-proto" id="section-proxy-proto">
+      <div class="category-header">
+        <div class="category-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <h2 class="category-title">PROXY Protocol Vendor Extensions</h2>
+        <span class="category-count">2 entries</span>
+      </div>
+      <div class="cards-grid">
+
+        <article class="card" data-search="ngx_http_proxy_protocol_vendor_module proxy protocol v2 tlv aws azure gcp cloud metadata vpc endpoint routing logging security">
+          <div class="card-badge">Entire Module — Plus Only</div>
+          <h3 class="card-module">ngx_http_proxy_protocol_vendor_module</h3>
+          <div class="card-directives">
+            <span class="card-directives-note">No directives — provides embedded variables for AWS, Azure, GCP proxy protocol TLVs</span>
+          </div>
+          <p class="card-usecase">Read cloud-specific metadata from PROXY protocol v2 headers</p>
+          <p class="card-value">Access cloud provider metadata (AWS VPC endpoint ID, Azure Link ID, GCP connection ID) from PROXY protocol v2 TLV fields for routing, logging, and security decisions.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_proxy_protocol_vendor_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+        <article class="card" data-search="ngx_stream_proxy_protocol_vendor_module proxy protocol v2 tlv aws azure gcp cloud metadata stream tcp udp">
+          <div class="card-badge">Entire Module — Plus Only</div>
+          <h3 class="card-module">ngx_stream_proxy_protocol_vendor_module</h3>
+          <div class="card-directives">
+            <span class="card-directives-note">Same as HTTP module but for stream (TCP/UDP) context</span>
+          </div>
+          <p class="card-usecase">Cloud metadata from PROXY protocol v2 for stream context</p>
+          <p class="card-value">Access cloud provider metadata from PROXY protocol v2 TLV fields in Layer 4 stream processing scenarios.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/stream/ngx_stream_proxy_protocol_vendor_module.html" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+        </article>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- No Results Message -->
+  <div class="no-results" id="noResults" style="display:none;">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6"/></svg>
+    <h3>No matching directives found</h3>
+    <p>Try a different search term or clear your filters.</p>
+    <button class="clear-btn" id="clearFilters">Clear All Filters</button>
+  </div>
+
+  <!-- Config Snippet Panel (shown when single category selected) -->
+  <div class="config-snippet-panel" id="configSnippetPanel">
+    <div class="config-panel-inner">
+      <div class="config-panel-header" id="configPanelHeader">
+        <div class="config-panel-header-left">
+          <svg class="config-panel-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          <div>
+            <div class="config-panel-title" id="configPanelTitle">Configuration Example</div>
+            <div class="config-panel-subtitle" id="configPanelSubtitle">NGINX Plus directive reference</div>
+          </div>
+        </div>
+        <div class="config-panel-toggle">
+          <span id="configPanelToggleText">Collapse</span>
+          <svg class="config-panel-toggle-icon" id="configPanelToggleIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="config-panel-body" id="configPanelBody">
+        <div class="config-code-wrap">
+          <button class="config-copy-btn" id="configCopyBtn" title="Copy to clipboard">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span id="configCopyLabel">Copy</span>
+          </button>
+          <pre class="config-code-block" id="configCodeBlock"></pre>
+        </div>
+        <div class="config-panel-footer">
+          <a class="config-source-link" id="configSourceLink" href="#" target="_blank" rel="noopener noreferrer">docs.nginx.com</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <p class="footer-brand">NGINX Plus Quick Reference</p>
+        <p class="footer-updated">Last updated: February 27, 2026</p>
+      </div>
+      <div class="footer-right">
+        <a href="https://nginx.org/en/docs/" target="_blank" rel="noopener noreferrer" class="footer-link">NGINX Official Documentation</a>
+        <span class="footer-sep">|</span>
+        <a href="https://www.f5.com/products/nginx" target="_blank" rel="noopener noreferrer" class="footer-link">F5 NGINX Plus</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Fullscreen Diagram Overlay -->
+  <div class="fs-overlay" id="fsOverlay">
+    <div class="fs-chrome">
+      <div class="fs-header">
+        <div class="fs-label" id="fsLabel">Authentication & SSO</div>
+        <div class="fs-nav">
+          <button class="fs-nav-btn" id="fsPrev" title="Previous (←)">← Prev</button>
+          <span class="fs-nav-counter" id="fsCounter">1 / 17</span>
+          <button class="fs-nav-btn" id="fsNext" title="Next (→)">Next →</button>
+        </div>
+        <button class="fs-close" id="fsClose" title="Close (ESC)">✕</button>
+      </div>
+      <div class="fs-diagram" id="fsDiagram"></div>
+      <div class="fs-hint">← → navigate &middot; ESC close &middot; F toggle</div>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
