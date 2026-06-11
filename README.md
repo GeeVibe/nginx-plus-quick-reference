@@ -4,6 +4,8 @@
 
 <h1 align="center">NGINX Plus Quick Reference</h1>
 
+<p align="center"><sub>NGINX® and NGINX Plus® are registered trademarks of F5, Inc. This is an unofficial community reference and is not affiliated with, endorsed by, or sponsored by F5.</sub></p>
+
 > A field-ready, use-case-driven guide to what NGINX Plus unlocks beyond open-source NGINX.
 > Built for F5 Solutions Engineers in the field, NGINX Plus customers evaluating the platform, and anyone deciding between Plus and OSS.
 
