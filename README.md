@@ -32,7 +32,7 @@
 - Information cards and diagrams for **36 directives** across **17 use-case categories** — authentication, load balancing, API gateway, HA & clustering, key-value store, health checks, TLS, caching, session logging, and more
 - **Inline marketecture diagrams** — fullscreen-ready, presentable, designed to *replace* the whiteboard
 - **Copy-paste config snippets** — every directive comes with a working example
-- **Customer-value framing** — every entry answers *what does this unlock that OSS can't?*
+- **Customer-value framing** — every entry answers *what does Plus unlock that OSS can't?*
 - **Keyboard-first navigation** — `/` to search, `F` for fullscreen, arrow keys to flip diagrams
 
 ---
