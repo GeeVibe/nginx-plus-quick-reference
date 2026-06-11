@@ -282,6 +282,24 @@ body {
   line-height: 1.4;
 }
 
+.filter-prompt-cue {
+  display: inline-block;
+  color: var(--accent-green, #7cc97a);
+  font-weight: 600;
+  animation: filterPromptBob 2.2s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform;
+}
+
+@keyframes filterPromptBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filter-prompt-cue { animation: none; }
+}
+
 .filter-pills {
   display: flex;
   flex-wrap: wrap;
