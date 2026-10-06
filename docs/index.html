@@ -102,7 +102,7 @@
 
   <!-- Results Count -->
   <div class="results-count" id="resultsCount">
-    <span id="resultsText">Showing all 36 entries</span>
+    <span id="resultsText">Showing all 37 entries</span>
   </div>
 
   <!-- Main Content: Cards grouped by category -->
@@ -201,7 +201,7 @@
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
         </div>
         <h2 class="category-title">Dynamic Configuration &amp; API</h2>
-        <span class="category-count">2 entries</span>
+        <span class="category-count">3 entries</span>
       </div>
       <div class="cards-grid">
 
@@ -228,6 +228,17 @@
             <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_upstream_module.html#state" target="_blank" rel="noopener noreferrer">HTTP Docs <span class="arrow">→</span></a>
             <a class="card-link" href="https://nginx.org/en/docs/stream/ngx_stream_upstream_module.html#state" target="_blank" rel="noopener noreferrer">Stream Docs <span class="arrow">→</span></a>
           </div>
+        </article>
+
+        <article class="card" data-search="license_pending_token ngx_mgmt_module mgmt license jwt token renewal autorenewal deferred pending api put change control">
+          <div class="card-badge">Plus-Only Directive</div>
+          <h3 class="card-module">ngx_mgmt_module</h3>
+          <div class="card-directives">
+            <code>license_pending_token</code>
+          </div>
+          <p class="card-usecase">Control when a renewed license token takes effect</p>
+          <p class="card-value">By default, a renewed JWT license token from F5 is saved and applied right away. Set it to a file path and the renewed token is saved there but not applied, ready to copy into place or apply with a <code>PUT</code> to <code>/api/10/license</code>. Set it to <code>off</code> and renewals are logged and discarded, so the license is renewed only through that API. Either way, you decide when a new license token goes live.</p>
+          <a class="card-link" href="https://nginx.org/en/docs/ngx_mgmt_module.html#license_pending_token" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
         </article>
 
       </div>
