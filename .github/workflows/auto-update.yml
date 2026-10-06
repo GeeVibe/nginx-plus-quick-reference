@@ -33,33 +33,32 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Check release notes for a new version
+      # Detect changes straight from the upstream source repos (no HTML scraping):
+      #   nginx/documentation  content/nginx/releases.md  → new release sections
+      #   nginx/nginx.org      xml/en/docs/**             → new Plus-only <directive>s
+      # Baseline commits live in state/upstream-commits.json.
+      - name: Diff upstream repos against last-processed commits
         id: check
         run: |
-          python3 skills/nginx-plus-guide-updater/scripts/check-release-notes.py > /tmp/latest.json
-          cat /tmp/latest.json
-          echo "latest_version=$(jq -r .latest_version /tmp/latest.json)" >> "$GITHUB_OUTPUT"
+          python3 skills/nginx-plus-guide-updater/scripts/check-upstream.py > /tmp/upstream.json
+          jq '{needs_update, latest_version, repos, new_releases: [.new_releases[].version], new_plus_directives: [.new_plus_directives[].directive]}' /tmp/upstream.json
+          echo "latest_version=$(jq -r .latest_version /tmp/upstream.json)" >> "$GITHUB_OUTPUT"
+          echo "needs_update=$(jq -r .needs_update /tmp/upstream.json)" >> "$GITHUB_OUTPUT"
+          cp /tmp/upstream.json "$RUNNER_TEMP/upstream.json"
 
-      - name: Compare against last-seen version
+      - name: Skip if an auto-update PR is already open
         id: compare
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          LATEST="${{ steps.check.outputs.latest_version }}"
-          LAST_SEEN=$(cat skills/nginx-plus-guide-updater/state/last-seen-version.txt | tr -d '[:space:]')
-          echo "Latest: $LATEST"
-          echo "Last seen: $LAST_SEEN"
-          if [ "$LATEST" = "$LAST_SEEN" ]; then
-            echo "No new version. Exiting clean."
-            echo "needs_update=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "New version detected: $LATEST"
-            echo "needs_update=true" >> "$GITHUB_OUTPUT"
+          NEEDS="${{ steps.check.outputs.needs_update }}"
+          OPEN=$(gh pr list --state open --json headRefName \
+            --jq '[.[] | select(.headRefName | startswith("auto-update/"))] | length')
+          if [ "$NEEDS" = "true" ] && [ "$OPEN" != "0" ]; then
+            echo "An auto-update PR is already open; not opening another."
+            NEEDS=false
           fi
-
-      - name: Stop early if no update needed
-        if: steps.compare.outputs.needs_update == 'false'
-        run: |
-          echo "Nothing to do."
-          exit 0
+          echo "needs_update=$NEEDS" >> "$GITHUB_OUTPUT"
 
       # ──────────────────────────────────────────────────────────
       # The next step is where the Claude Code skill is invoked.
@@ -72,7 +71,10 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
-            Use the nginx-plus-guide-updater skill to process NGINX Plus release ${{ steps.check.outputs.latest_version }}.
+            Use the nginx-plus-guide-updater skill to process upstream NGINX Plus changes
+            (latest release: ${{ steps.check.outputs.latest_version }}).
+            The upstream diff has already been computed and is at ${{ runner.temp }}/upstream.json —
+            read it first; do not re-scrape docs.nginx.com or nginx.org to detect changes.
             Follow the five-step workflow in skills/nginx-plus-guide-updater/SKILL.md.
             Open a pull request with the proposed changes.
           # Pass tool allow-list via claude_args (allowed_tools is no longer a top-level input on v1)
@@ -85,5 +87,6 @@ jobs:
         run: |
           echo "### Auto-update run complete" >> "$GITHUB_STEP_SUMMARY"
           echo "- Latest version: ${{ steps.check.outputs.latest_version }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Update needed: ${{ steps.compare.outputs.needs_update }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Upstream changes found: ${{ steps.check.outputs.needs_update }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- PR drafted this run: ${{ steps.compare.outputs.needs_update }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Trigger: ${{ github.event_name }}" >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,12 @@
+{
+  "nginx/documentation": {
+    "sha": "1f1f834d9642b0a83cbf6b6db6e6ad92b2345c87",
+    "path": "content/nginx/releases.md",
+    "note": "Last commit before/at PLS.37.0.1.1 (2026-05-22)"
+  },
+  "nginx/nginx.org": {
+    "sha": "ae98b2c12e265ffea68f7d0762f91ef645e47128",
+    "path": "xml/en/docs",
+    "note": "Last commit before/at PLS.37.0.1.1 (2026-05-22)"
+  }
+}
