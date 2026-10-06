@@ -15,7 +15,7 @@ Thanks for considering a contribution. This project welcomes PRs, issues, and di
 | **Spot a factual error** | Open an issue with the page link and the correction |
 | **Suggest a missing use case** | Open an issue describing the use case and which Plus directive(s) it'd showcase |
 | **Improve a diagram or description** | Fork → edit → PR |
-| **Add a translation** | Fork → translate `docs/app.js` strings → PR |
+| **Add a translation** | Fork → translate the cards in `docs/index.html` (and diagram/snippet labels in `docs/app.js`) → PR |
 | **Vertical/regional customization** | Fork to your own GitHub org and deploy independently (no PR back needed — the license permits this) |
 | **Fix a typo** | Just open the PR directly |
 
@@ -25,7 +25,7 @@ Thanks for considering a contribution. This project welcomes PRs, issues, and di
 
 1. Fork the repo
 2. Create a feature branch (`fix/typo-oidc-description` or `add/grpc-use-case`)
-3. Edit `docs/app.js` for content; `docs/style.css` for visuals; `docs-meta/` for documentation
+3. Edit `docs/index.html` for directive cards; `docs/app.js` for category diagrams and config snippets; `docs/style.css` for visuals; `docs-meta/` for documentation
 4. Open the live preview locally (`python3 -m http.server 8000 -d docs`)
 5. Open the PR with a short description of *why* the change matters
 
