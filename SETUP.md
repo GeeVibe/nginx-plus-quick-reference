@@ -82,10 +82,10 @@ The `GITHUB_TOKEN` secret is automatically provided by GitHub — you don't need
 1. Go to **Actions** tab → *Auto-update NGINX Plus directives*
 2. Click *Run workflow* → select `main` → *Run workflow*
 3. Watch it run. Two outcomes:
-   - **No new version detected** → workflow exits clean (most weeks)
-   - **New version detected** → skill drafts entries and opens a PR
+   - **No upstream changes** → workflow exits clean (most weeks)
+   - **New release or Plus-only directive upstream** → skill drafts entries and opens a PR
 
-Either is correct. If you want to *force* a PR for testing, edit `skills/nginx-plus-guide-updater/state/last-seen-version.txt` to an older version (e.g., `R30`), commit, push, then re-run the workflow.
+Either is correct. To *force* a PR for testing, set a SHA in `skills/nginx-plus-guide-updater/state/upstream-commits.json` to an older upstream commit, commit, push, then re-run the workflow. You can preview the result locally with `python3 skills/nginx-plus-guide-updater/scripts/check-upstream.py`.
 
 ---
 
@@ -122,6 +122,6 @@ The most common stumbles:
 - **Pages not deploying** → Check Actions tab; the workflow may need to be approved on first run for new repos
 - **Workflow needs permissions** → Settings → Actions → General → Workflow permissions → "Read and write permissions"
 - **Anthropic API errors** → Check the secret name is exactly `ANTHROPIC_API_KEY` (case-sensitive)
-- **Skill not finding new directives** → docs.nginx.com may have changed structure; check `scripts/check-release-notes.py` parser
+- **Skill not finding new directives** → an upstream repo may have moved files (`nginx/documentation` → `content/nginx/releases.md`, `nginx/nginx.org` → `xml/en/docs/`); check `scripts/check-upstream.py`
 
 Open an issue on the repo if you hit something not covered here.

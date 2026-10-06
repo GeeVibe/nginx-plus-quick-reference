@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The auto-updater now finds changes by diffing the upstream source repos (`nginx/documentation` `releases.md` and `nginx/nginx.org` `xml/en/docs/`) from the commits recorded in `state/upstream-commits.json`. It no longer scrapes docs.nginx.com.
+- Plus-only status is detected from the `<commercial_version>` marker in the nginx.org XML.
+- The workflow skips drafting while an `auto-update/*` PR is already open.
+- `extract-directive.py` now parses the directive's XML source in `nginx/nginx.org` with a real XML parser. It no longer regex-scrapes nginx.org HTML. It can find the module automatically from the local clone, returns `appeared_in` and every example, and pins to a commit with `--ref`.
+- The Plus-only rule now lives in `scripts/plus_marker.py`, shared by both scripts. It tells "This directive is available as part of our commercial subscription" (Plus-only) apart from OSS directives that only have Plus-only parameters (`partial`, e.g. upstream `zone` and `sticky`).
+
+### Removed
+
+- `scripts/check-release-notes.py` (HTML scraper)
+
 ## [1.0.0] — 2026-06-02
 
 ### Added

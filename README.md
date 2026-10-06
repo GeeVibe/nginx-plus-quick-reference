@@ -41,10 +41,10 @@
 
 This guide auto-updates itself.
 
-A [Claude Code skill](skills/nginx-plus-guide-updater/) watches the official NGINX Plus release notes. When a new Plus-only directive is introduced, the skill:
+A weekly GitHub Action diffs the upstream source repos that the official docs are built from: [`nginx/documentation`](https://github.com/nginx/documentation) for the release notes and [`nginx/nginx.org`](https://github.com/nginx/nginx.org) for the directive reference. Nothing is scraped. When a new release or Plus-only directive appears, a [Claude Code skill](skills/nginx-plus-guide-updater/) takes over and:
 
-1. Detects the change in the release notes
-2. Reads the official documentation page for the new directive (docs.nginx.com is the source of truth)
+1. Detects the change with a git diff from the last-processed commits
+2. Reads the directive's official source (the nginx.org XML, which marks Plus-only features with `<commercial_version>`)
 3. Generates a new directive card in the guide's format
 4. Suggests which use-case category it belongs to
 5. Opens a pull request with a diff, sources, and a review checklist

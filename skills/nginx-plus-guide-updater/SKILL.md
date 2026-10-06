@@ -21,7 +21,8 @@ Invoke this skill when any of the following happens:
 ## Inputs
 
 - `REPO_ROOT` — absolute path to the repo checkout (the working directory of the GitHub Action)
-- `LAST_SEEN_VERSION` — read from `skills/nginx-plus-guide-updater/state/last-seen-version.txt`
+- `UPSTREAM_STATE` — `skills/nginx-plus-guide-updater/state/upstream-commits.json` (last-processed commit SHA of each upstream repo)
+- `UPSTREAM_DIFF` — JSON output of `scripts/check-upstream.py` (in CI it is pre-computed at `$RUNNER_TEMP/upstream.json`)
 - `DOCS_BASE_URL` — `https://docs.nginx.com/nginx/`
 - `RELEASE_NOTES_URL` — `https://docs.nginx.com/nginx/releases/`
 
@@ -38,25 +39,39 @@ For the purposes of this guide we don't care about LTS vs CR tracks or version-n
 
 ### Step 1 — Check the release notes
 
-Run `scripts/check-release-notes.py` (or fetch `https://docs.nginx.com/nginx/releases/` manually). The script returns the latest release string it found, whether R-series or PLS-series.
+Change detection reads the **upstream source repos directly** — never scrape rendered HTML to detect changes:
 
-Compare against `state/last-seen-version.txt` (plain text, one line, the version string).
+| Repo | Path | What it gives us |
+|---|---|---|
+| [`nginx/documentation`](https://github.com/nginx/documentation) | `content/nginx/releases.md` | Markdown source of docs.nginx.com/nginx/releases/ |
+| [`nginx/nginx.org`](https://github.com/nginx/nginx.org) | `xml/en/docs/**/*.xml` | XML source of the nginx.org directive reference |
 
-- If unchanged → **stop**. No PR. Exit clean.
-- If newer → continue to Step 2 with the new version.
+Run `scripts/check-upstream.py` (in CI, read the pre-computed `$RUNNER_TEMP/upstream.json` instead). It partial-clones both repos, diffs from the SHAs in `state/upstream-commits.json` to `HEAD`, and returns:
 
-The release-notes page lists every release with its new directives, modules, and modules-changed sections. Parse those.
+- `new_releases[]` — release sections added to `releases.md` since the baseline, each with its raw `notes_markdown`
+- `new_plus_directives[]` — `<directive>` blocks added to nginx.org XML that are Plus-only (module summary says "available as part of our commercial subscription", or the directive body has a current `<commercial_version>` note)
+- `latest_version`, `needs_update`, and `repos.<name>.head` (the SHAs to record when you're done)
+
+- If `needs_update` is `false` → **stop**. No PR. Exit clean.
+- Otherwise → continue to Step 2.
 
 ### Step 2 — Extract new directives
 
-For each "new directive" or "new module" entry in the latest release notes:
+Candidates come from two places — merge and de-duplicate them:
+
+1. Every entry in `new_plus_directives[]` (already confirmed Plus-only by the XML marker).
+2. Directives/modules mentioned in each `new_releases[].notes_markdown` (links to `nginx.org/en/docs/...#<directive>`). Security-only releases usually have none.
+
+Many release-note mentions are OSS features that Plus inherits — the nginx.org XML is how you tell them apart. Read the XML source rather than the rendered page: `https://raw.githubusercontent.com/nginx/nginx.org/<head-sha>/xml/en/docs/<path>.xml` (or `git show` in the clone).
+
+For each candidate:
 
 - Get the directive name (e.g., `js_periodic`, `oidc_token_endpoint`)
 - Get the module/context it lives in (e.g., `http`, `stream`, `ngx_http_oidc_module`)
 - Follow the link to the directive's full documentation page on `docs.nginx.com`
-- Verify the directive is **Plus-only** — check for the "NGINX Plus" badge or note on the docs page. If it's also in OSS, do not add it; this guide is for *Plus-only* features.
+- Verify the directive is **Plus-only** — a `<commercial_version>` marker in the module summary or the directive's own body (ignore "Prior to version X … commercial subscription" notes; those features moved to OSS). If it's also in OSS, do not add it; this guide is for *Plus-only* features.
 
-Document the directive's:
+Run `scripts/extract-directive.py` to get these fields from the XML source, then document the directive's:
 
 - Full syntax signature
 - Default value (if any)
@@ -64,7 +79,7 @@ Document the directive's:
 - Description (paraphrase the official docs in 1-2 plain-English sentences)
 - A minimal config example (lift from the docs example, brevity-edit it)
 
-**docs.nginx.com is the source of truth.** Do not invent or speculate. If a field isn't in the docs, leave it blank and flag it in the PR description.
+**The upstream docs sources are the source of truth**: the nginx.org XML for directive fields, and the docs.nginx.com release notes for what shipped. Do not invent or speculate. If a field isn't in the source, leave it blank and flag it in the PR description.
 
 ### Step 3 — Categorize
 
@@ -123,8 +138,9 @@ Create a new branch: `auto-update/<RELEASE_VERSION>-<YYYY-MM-DD>` (e.g., `auto-u
 Commit the changes:
 
 1. New entries appended to the directives array in `docs/app.js`
-2. Updated `state/last-seen-version.txt` with the new version
-3. Updated `CHANGELOG.md` with a new entry under `## [Unreleased]`
+2. Updated `state/upstream-commits.json` — set each repo's `sha` to `repos.<name>.head` from the diff output
+3. Updated `state/last-seen-version.txt` with `latest_version` (shown as the version badge on the site)
+4. Updated `CHANGELOG.md` with a new entry under `## [Unreleased]`
 
 Open a PR titled: **`Auto-update: NGINX Plus <VERSION> — N new directives`**
 
@@ -133,7 +149,7 @@ The PR body must include:
 ```markdown
 ## NGINX Plus <VERSION> — Detected Changes
 
-**Source:** https://docs.nginx.com/nginx/releases/
+**Source:** nginx/documentation `<base>..<head>` · nginx/nginx.org `<base>..<head>` (link the GitHub compare URLs)
 
 ### New directives added
 
@@ -164,7 +180,7 @@ After the PR is opened, **stop**. Do not merge. Do not push to `main`.
 
 - ❌ Push directly to `main`
 - ❌ Add a directive that isn't in the official NGINX Plus release notes
-- ❌ Invent syntax, defaults, or behavior not present in `docs.nginx.com`
+- ❌ Invent syntax, defaults, or behavior not present in the official docs sources (nginx.org XML / docs.nginx.com)
 - ❌ Delete or modify existing directive entries (separate workflow for that)
 - ❌ Add OSS directives (this guide is Plus-only)
 - ❌ Silently create a new category — always propose in PR description first
@@ -172,22 +188,24 @@ After the PR is opened, **stop**. Do not merge. Do not push to `main`.
 ## Files this skill touches
 
 - `docs/app.js` — append new entries to the directives array
-- `state/last-seen-version.txt` — last release version we've processed (plain text)
+- `state/upstream-commits.json` — last-processed commit of each upstream repo (drives change detection)
+- `state/last-seen-version.txt` — latest release version string (display only)
 - `CHANGELOG.md` — log what changed
 
 ## Files this skill READS (source of truth)
 
-- `https://docs.nginx.com/nginx/releases/` — release notes
-- `https://docs.nginx.com/nginx/admin-guide/**` — admin guide for context
-- `https://nginx.org/en/docs/**` — official directive reference
+- `github.com/nginx/documentation` → `content/nginx/releases.md` — release notes source
+- `github.com/nginx/nginx.org` → `xml/en/docs/**` — official directive reference source
+- `https://docs.nginx.com/nginx/admin-guide/**` — admin guide for context (optional)
 - `docs/app.js` — existing entries (for format + categories)
 
 ## Helper scripts
 
 The `scripts/` subdirectory contains:
 
-- `check-release-notes.py` — quick check whether a new version exists; outputs JSON
-- `extract-directive.py` — given a directive name and module, fetches the docs page and returns structured fields
+- `check-upstream.py` — diffs the upstream source repos since the last-processed commits; outputs JSON
+- `extract-directive.py <directive> [--module ngx_..._module] [--ref <sha>]` — reads the directive's XML source from `nginx/nginx.org` and returns syntax, default, context, `appeared_in`, description, examples, and `is_plus_only`. It uses `check-upstream.py`'s local clone when there is one (pass `--ref` = `repos["nginx/nginx.org"].head`), and otherwise falls back to raw.githubusercontent.com. If a name exists in more than one module, for example in both http and stream, it lists the candidates and asks for `--module`. Use the `module` field from `new_plus_directives[]`.
+- `plus_marker.py` — the shared Plus-only rule both scripts use. `plus_signal` is `module`, `directive`, `partial` (an OSS directive with some Plus-only parameters, which is **not** Plus-only for this guide), or `null`
 
 Use these when you need deterministic parsing. For prose and judgment calls (categorization, customer-value framing), use your own reasoning.
 
@@ -195,8 +213,8 @@ Use these when you need deterministic parsing. For prose and judgment calls (cat
 
 If you cannot complete the workflow:
 
-- **Network failure fetching docs.nginx.com** → Exit non-zero. The GitHub Action will retry next week.
-- **Release notes format changed and parser breaks** → Open a PR titled `Auto-update: parser needs human attention` with a description of what changed.
+- **git clone/fetch of an upstream repo fails** → Exit non-zero. The GitHub Action will retry next week.
+- **Upstream files moved or format changed** (e.g. `releases.md` renamed, XML schema changed) → Open a PR titled `Auto-update: parser needs human attention` with a description of what changed.
 - **More than 10 new directives detected** → Don't try to do them all at once. Add the first 5, flag in the PR that more remain, and let the human triage.
 
 ## Quality bar

@@ -14,9 +14,11 @@
                                    │
                                    ▼
               ┌───────────────────────────────────────┐
-              │  Check docs.nginx.com/nginx/releases  │
-              │  Is there a newer NGINX Plus version  │
-              │  than state/last-seen-version.txt?    │
+              │  git diff upstream source repos since │
+              │  state/upstream-commits.json:         │
+              │   • nginx/documentation releases.md   │
+              │   • nginx/nginx.org xml/en/docs/**    │
+              │  New releases or Plus-only directives?│
               └──────────────────┬────────────────────┘
                                  │
                   ┌──────── No ──┴── Yes ────────┐
@@ -59,7 +61,9 @@
 
 ## Why a Claude Code skill, not just a script?
 
-Static scrapers break the moment docs.nginx.com restructures a page. A Claude Code skill is **prompted with intent** — "find new directives, read their docs, draft entries in this format" — and adapts to layout changes. The deterministic parts (release-notes version check, HTML parsing) live in Python scripts; the judgment calls (categorization, customer-value phrasing) live in the skill's reasoning.
+Change *detection* doesn't scrape anything. It diffs the Markdown/XML **source repos** behind docs.nginx.com and nginx.org ([`nginx/documentation`](https://github.com/nginx/documentation), [`nginx/nginx.org`](https://github.com/nginx/nginx.org)), so a site redesign can't break it. Plus-only status comes straight from the `<commercial_version>` marker in the nginx.org XML.
+
+Static scrapers break the moment docs.nginx.com restructures a page. A Claude Code skill is **prompted with intent** — "find new directives, read their docs, draft entries in this format" — and adapts to layout changes. The deterministic parts (upstream git diff, XML parsing) live in Python scripts; the judgment calls (categorization, customer-value phrasing) live in the skill's reasoning.
 
 The skill always opens a **pull request** instead of pushing to `main`. A human is always in the loop. The bar for an auto-merge is intentionally never met.
 
@@ -69,7 +73,7 @@ The skill always opens a **pull request** instead of pushing to `main`. A human 
 
 The skill follows the workflow defined in [`skills/nginx-plus-guide-updater/SKILL.md`](../skills/nginx-plus-guide-updater/SKILL.md):
 
-1. **Check release notes** — Fetch `docs.nginx.com/nginx/releases/`, find the latest NGINX Plus version, compare against `state/last-seen-version.txt`.
+1. **Diff upstream** — `check-upstream.py` partial-clones `nginx/documentation` and `nginx/nginx.org`, diffs since the SHAs in `state/upstream-commits.json`, and lists new release sections and new Plus-only directives.
 2. **Extract new directives** — For each new directive in the release notes, follow the link to its official documentation page. Verify it's Plus-only (not OSS).
 3. **Categorize** — Match each directive to one of the 17 existing use-case categories. Propose a new category if nothing fits.
 4. **Generate the entry** — Produce a JS object matching the shape of existing entries in `docs/app.js`. Reuse diagrams when appropriate.
@@ -126,7 +130,7 @@ Sometimes a directive is in the release notes but **shouldn't be in the guide** 
 To override:
 
 - **Skip a directive permanently:** Add it to `skills/nginx-plus-guide-updater/state/excluded-directives.txt`.
-- **Force a re-process of an old release:** Manually rewind `state/last-seen-version.txt` and run the workflow.
+- **Force a re-process of older changes:** Rewind the SHAs in `state/upstream-commits.json` to an older commit and run the workflow.
 - **Pin an entry against auto-update edits:** Tag the entry with `// pinned: do not auto-edit` in `docs/app.js`.
 
 ---
@@ -135,8 +139,9 @@ To override:
 
 | Failure | What happens |
 |---|---|
-| docs.nginx.com unreachable | Workflow exits non-zero; retries next week |
-| Release notes format changed | Skill opens a PR titled "parser needs human attention" |
+| GitHub clone/fetch fails | Workflow exits non-zero; retries next week |
+| Upstream file moved / format changed | Skill opens a PR titled "parser needs human attention" |
+| An auto-update PR is already open | Run skips drafting so it doesn't open a duplicate |
 | >10 new directives in a single release | Skill handles the first 5, flags the rest for human triage |
 | Skill flags a directive as ambiguous | Goes in the PR description under "Notes from the updater" |
 
