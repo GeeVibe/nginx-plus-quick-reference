@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `license_pending_token` (`ngx_mgmt_module`, NGINX Plus PLS.37.1.0.1) in the Dynamic Configuration & API category. It controls when a renewed license token takes effect.
+- Release tracking moved forward to NGINX Plus PLS.37.1.1.2.
+
 ### Changed
 
 - The auto-updater now finds changes by diffing the upstream source repos (`nginx/documentation` `releases.md` and `nginx/nginx.org` `xml/en/docs/`) from the commits recorded in `state/upstream-commits.json`. It no longer scrapes docs.nginx.com.
