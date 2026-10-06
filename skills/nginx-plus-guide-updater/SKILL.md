@@ -83,15 +83,19 @@ Run `scripts/extract-directive.py` to get these fields from the XML source, then
 
 ### Step 3 — Categorize
 
-The guide is organized into 17 use-case categories defined in `docs/app.js` as `CATEGORIES`:
+The site has no JS data model for entries. **Cards are static HTML in `docs/index.html`**, grouped into 17 use-case categories. A category is defined by three things that must stay in sync:
+
+1. A filter pill: `<button class="pill" data-category="<key>">` (near the top of `index.html`)
+2. A section: `<section class="category-section" data-category="<key>" id="section-<key>">` containing a `.cards-grid`
+3. One diagram, `DIAGRAMS['<key>']`, and one config example, `CONFIG_SNIPPETS['<key>']`, in `docs/app.js`. These are **per category, not per directive.**
+
+Current keys (run `grep -o 'data-category="[^"]*"' docs/index.html | sort -u` to confirm):
 
 ```
 auth · health · api · lb · kv · ha · iot · cache · media ·
 session-log · routing · tls · tunnel · internal ·
 stream-session · perf · proxy-proto
 ```
-
-Read `docs/app.js` to confirm the current categories (they may have evolved).
 
 For each new directive, match it to the **best-fit existing category** based on the directive's use case (not the module). Examples:
 
@@ -100,36 +104,46 @@ For each new directive, match it to the **best-fit existing category** based on 
 - `keyval_*` → `kv`
 - `js_periodic` → `routing` or `perf` (judgment call — flag for human review)
 
-If no category fits well, **propose a new category** in the PR description with a 1-line justification. Do not silently create a new category in the code.
+If no category fits well, **propose a new category** in the PR description with a 1-line justification. Do not silently create a new category in the code. A new category needs a pill, a section, a diagram and a snippet, and a human should design those.
 
-### Step 4 — Generate the entry
+### Step 4 — Generate the card
 
-Each entry in `docs/app.js` follows this shape (read the existing entries to mirror the format exactly):
+Append an `<article class="card">` to the end of the matching section's `.cards-grid` in `docs/index.html`. Copy the markup of the existing cards exactly:
 
-```js
-{
-  id: 'directive_name',
-  category: 'auth',
-  directive: 'directive_name',
-  title: 'Plain-English Use Case Title',
-  description: 'Short paragraph: what this unlocks for the customer.',
-  customerValue: 'One-line statement of business value.',
-  docsUrl: 'https://docs.nginx.com/nginx/admin-guide/...',
-  diagram: 'category-key',   // reuse an existing diagram if appropriate
-  config: `# minimal working example
-http {
-    upstream backend {
-        zone backend 64k;
-        # ...
-    }
-}`
-}
+```html
+<article class="card" data-search="<directive names> <module> <use-case keywords people would search for>">
+  <div class="card-badge">Plus-Only Directive</div>
+  <h3 class="card-module">ngx_http_example_module</h3>
+  <div class="card-directives">
+    <code>example_directive</code>
+  </div>
+  <p class="card-usecase">Plain-English use case, one line</p>
+  <p class="card-value">What this unlocks for the customer, in one or two sentences. Stay within what the docs say.</p>
+  <a class="card-link" href="https://nginx.org/en/docs/http/ngx_http_example_module.html#example_directive" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
+</article>
 ```
 
-**Diagram handling:**
+- **`card-badge`:** choose from the badges already in use, based on `plus_signal`:
+  - `module` → `Entire Module — Plus Only`
+  - `directive` → `Plus-Only Directive` (or `Plus-Only Directives` when one card covers several)
+  - Others in use: `Plus-Only Parameters`, `Plus-Only Server Parameter`
+- **`card-module`:** the `module` field from `extract-directive.py`. If the directive exists in both http and stream, use `ngx_http_x_module &amp; ngx_stream_x_module` with `<div class="card-links-multi">` and one `card-link` per module (see the `state` card).
+- **`data-search`:** this is the only thing search matches on, so include every directive name, the module, and the use-case words.
+- **Optional bits:** `<span class="card-directives-more">+N more …</span>` for long directive lists, and `<span class="card-directives-note">…</span>` when there are no directives to list.
+- **Escape `&` as `&amp;`** in text.
 
-- If a similar use-case diagram already exists, reuse it.
-- If a brand-new diagram is needed, **do not generate SVG.** Add `diagram: null` and flag in the PR description: *"New directive needs a custom diagram — please add to `svgDiagrams` in `docs/app.js`."*
+**Update the hard-coded counts** in the same commit:
+
+- The section's `<span class="category-count">N entries</span>`
+- `<span id="resultsText">Showing all N entries</span>`, where N is the total number of `<article class="card"` elements
+
+**Diagrams and config snippets:** both are per category and shared by every card in it. **Do not edit `DIAGRAMS` or `CONFIG_SNIPPETS`, and do not generate SVG.** If the category's diagram or snippet doesn't reflect the new directive, say so in the PR description (*"`<key>` diagram/snippet could be extended to show `<directive>`"*) and leave the change to a human. Never invent a config example. If the XML has no `<example>`, write that in the notes.
+
+**Verify before committing:**
+
+- `grep -c '<article class="card"' docs/index.html` equals the new "Showing all N entries" number
+- Each section's count matches the number of cards in it
+- The tags are balanced. Mention in the PR if you couldn't render the page.
 
 ### Step 5 — Open the PR
 
@@ -137,7 +151,7 @@ Create a new branch: `auto-update/<RELEASE_VERSION>-<YYYY-MM-DD>` (e.g., `auto-u
 
 Commit the changes:
 
-1. New entries appended to the directives array in `docs/app.js`
+1. New cards in `docs/index.html`, with the section count and "Showing all N entries" updated
 2. Updated `state/upstream-commits.json` — set each repo's `sha` to `repos.<name>.head` from the diff output
 3. Updated `state/last-seen-version.txt` with `latest_version` (shown as the version badge on the site)
 4. Updated `CHANGELOG.md` with a new entry under `## [Unreleased]`
@@ -157,7 +171,7 @@ For each directive:
 - **`directive_name`** — categorized as `<category>`
   - Source: <link to docs.nginx.com page>
   - Plus-only confirmed: ✅ / ⚠️ (could not verify)
-  - Diagram: reused `<diagram-key>` / needs new diagram
+  - Category diagram/snippet: still accurate / could be extended to show this directive
   - Notes: (any judgment calls or fields left blank)
 
 ### Review checklist for the human
@@ -165,8 +179,9 @@ For each directive:
 - [ ] Directive is genuinely Plus-only (not in OSS)
 - [ ] Description matches the official docs (no hallucinated behavior)
 - [ ] Category is the best fit (or new category is justified)
-- [ ] Config example is minimal but valid
-- [ ] Diagram assignment makes sense
+- [ ] Badge matches the Plus-only scope (module vs directive)
+- [ ] Section count and "Showing all N entries" are correct
+- [ ] Category diagram/snippet notes make sense
 - [ ] Customer-value line resonates (rewrite if needed)
 
 ### Notes from the updater
@@ -181,13 +196,14 @@ After the PR is opened, **stop**. Do not merge. Do not push to `main`.
 - ❌ Push directly to `main`
 - ❌ Add a directive that isn't in the official NGINX Plus release notes
 - ❌ Invent syntax, defaults, or behavior not present in the official docs sources (nginx.org XML / docs.nginx.com)
-- ❌ Delete or modify existing directive entries (separate workflow for that)
+- ❌ Delete or modify existing cards (separate workflow for that), or any card marked `<!-- pinned: do not auto-edit -->`
+- ❌ Edit `DIAGRAMS` / `CONFIG_SNIPPETS` in `docs/app.js` or generate SVG
 - ❌ Add OSS directives (this guide is Plus-only)
 - ❌ Silently create a new category — always propose in PR description first
 
 ## Files this skill touches
 
-- `docs/app.js` — append new entries to the directives array
+- `docs/index.html` — append cards to a category section; update its count and the total
 - `state/upstream-commits.json` — last-processed commit of each upstream repo (drives change detection)
 - `state/last-seen-version.txt` — latest release version string (display only)
 - `CHANGELOG.md` — log what changed
@@ -197,7 +213,8 @@ After the PR is opened, **stop**. Do not merge. Do not push to `main`.
 - `github.com/nginx/documentation` → `content/nginx/releases.md` — release notes source
 - `github.com/nginx/nginx.org` → `xml/en/docs/**` — official directive reference source
 - `https://docs.nginx.com/nginx/admin-guide/**` — admin guide for context (optional)
-- `docs/app.js` — existing entries (for format + categories)
+- `docs/index.html` — existing cards and sections (format + categories)
+- `docs/app.js` — `DIAGRAMS` / `CONFIG_SNIPPETS` per category (read only, to judge whether they still fit)
 
 ## Helper scripts
 

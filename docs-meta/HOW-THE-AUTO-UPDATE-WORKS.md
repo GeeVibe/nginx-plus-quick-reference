@@ -39,10 +39,10 @@
                               └─────────────────┬─────────────────────────┘
                                                 ▼
                           ┌─────────────────────────────────────────┐
-                          │ Generate JS entries matching app.js     │
-                          │ format. Reuse existing diagrams when    │
-                          │ possible; flag when a new diagram needs │
-                          │ human design.                           │
+                          │ Append a static HTML card to the        │
+                          │ category section in docs/index.html.    │
+                          │ Diagrams/snippets are per category and  │
+                          │ only a human edits them; flag gaps.     │
                           └────────────────────┬────────────────────┘
                                                ▼
                           ┌─────────────────────────────────────────┐
@@ -76,7 +76,7 @@ The skill follows the workflow defined in [`skills/nginx-plus-guide-updater/SKIL
 1. **Diff upstream** — `check-upstream.py` partial-clones `nginx/documentation` and `nginx/nginx.org`, diffs since the SHAs in `state/upstream-commits.json`, and lists new release sections and new Plus-only directives.
 2. **Extract new directives** — For each new directive in the release notes, follow the link to its official documentation page. Verify it's Plus-only (not OSS).
 3. **Categorize** — Match each directive to one of the 17 existing use-case categories. Propose a new category if nothing fits.
-4. **Generate the entry** — Produce a JS object matching the shape of existing entries in `docs/app.js`. Reuse diagrams when appropriate.
+4. **Generate the card** — Append an `<article class="card">` to the category's section in `docs/index.html` and update the hard-coded counts. The diagram and config snippet for each category (in `docs/app.js`) are left alone; any gaps are flagged in the PR.
 5. **Open the PR** — Commit to a branch, push, open a PR titled `Auto-update: NGINX Plus <version> — <N> new directives`. Stop. Never auto-merge.
 
 ---
@@ -114,7 +114,7 @@ Each PR includes:
 
 **Review process** (recommended for the maintainer):
 
-1. Scan the diff in `docs/app.js` for the new entries
+1. Scan the diff in `docs/index.html` for the new cards and updated counts
 2. For each new directive: click the source URL, verify the description matches
 3. Confirm the category assignment is sensible
 4. Spot-check the config example by mentally running it through `nginx -t`
@@ -131,7 +131,7 @@ To override:
 
 - **Skip a directive permanently:** Add it to `skills/nginx-plus-guide-updater/state/excluded-directives.txt`.
 - **Force a re-process of older changes:** Rewind the SHAs in `state/upstream-commits.json` to an older commit and run the workflow.
-- **Pin an entry against auto-update edits:** Tag the entry with `// pinned: do not auto-edit` in `docs/app.js`.
+- **Pin a card against auto-update edits:** Put `<!-- pinned: do not auto-edit -->` immediately above its `<article class="card">` in `docs/index.html`.
 
 ---
 

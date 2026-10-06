@@ -70,7 +70,7 @@ open docs/index.html
 python3 -m http.server 8000 -d docs
 ```
 
-Edit `docs/app.js` to add or modify directive entries. The site reloads on refresh — no build pipeline.
+Directive cards are static HTML in `docs/index.html`. Per-category diagrams and config snippets live in `docs/app.js`. Refresh to see changes; there's no build pipeline. See [`docs-meta/EXTENDING-THE-GUIDE.md`](docs-meta/EXTENDING-THE-GUIDE.md).
 
 ---
 
@@ -79,8 +79,8 @@ Edit `docs/app.js` to add or modify directive entries. The site reloads on refre
 ```
 nginx-plus-quick-reference/
 ├── docs/                          # The GitHub Pages site (HTML/CSS/JS)
-│   ├── index.html
-│   ├── app.js                     # All directive content lives here
+│   ├── index.html                 # Directive cards, grouped by category
+│   ├── app.js                     # Search/filter + per-category diagrams & config snippets
 │   └── style.css
 ├── skills/
 │   └── nginx-plus-guide-updater/  # Claude Code skill for auto-updates
