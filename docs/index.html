@@ -237,7 +237,7 @@
             <code>license_pending_token</code>
           </div>
           <p class="card-usecase">Control when a renewed license token takes effect</p>
-          <p class="card-value">By default, a renewed JWT license token from F5 is saved and applied right away. With this directive, the renewed token is saved to a file and not applied, so you can apply it later with a <code>PUT</code> to the <code>/api/10/license</code> endpoint. Or set it to <code>off</code> to discard renewals and manage the license only through the API. This keeps license changes inside your change-control process.</p>
+          <p class="card-value">By default, a renewed JWT license token from F5 is saved and applied right away. Set it to a file path and the renewed token is saved there but not applied, ready to copy into place or apply with a <code>PUT</code> to <code>/api/10/license</code>. Set it to <code>off</code> and renewals are logged and discarded, so the license is renewed only through that API. Either way, you decide when a new license token goes live.</p>
           <a class="card-link" href="https://nginx.org/en/docs/ngx_mgmt_module.html#license_pending_token" target="_blank" rel="noopener noreferrer">View Docs <span class="arrow">→</span></a>
         </article>
 
